@@ -74,7 +74,33 @@ def geocode_records(
     total = min(limit, len(records))
     for idx, entry in enumerate(records[:limit], start=1):
 
-        query = f"{entry['City']}, {entry['State']}, {entry['Country']}"
+        # helper to safely coerce values to stripped strings
+        def _safe_strip(v):
+            if v is None:
+                return ""
+            try:
+                s = str(v)
+            except Exception:
+                return ""
+            s = s.strip()
+            if s.lower() in ("nan", "none"):
+                return ""
+            return s
+
+        # prefer City,State,Country; fall back to Zip+Country or State+Country
+        country = _safe_strip(entry.get("Country")) or "USA"
+        city = _safe_strip(entry.get("City"))
+        state = _safe_strip(entry.get("State"))
+        zip_code = _safe_strip(entry.get("Zip") or entry.get("zip") or entry.get("Postal"))
+
+        if city and state:
+            query = f"{city}, {state}, {country}"
+        elif zip_code:
+            query = f"{zip_code}, {country}"
+        elif state:
+            query = f"{state}, {country}"
+        else:
+            query = country
 
         if query in cache:
             entry["Latitude"], entry["Longitude"] = cache[query]
@@ -170,9 +196,11 @@ def render_heatmap(
     city_col = lower_map.get("city")
     state_col = lower_map.get("state")
     country_col = lower_map.get("country")
+    zip_col = lower_map.get("zip") or lower_map.get("zip code") or lower_map.get("postal code") or lower_map.get("postal")
 
     has_latlon = "Latitude" in work_df.columns and "Longitude" in work_df.columns
-    has_address = city_col and state_col and country_col
+    # consider address present if city+state+country OR zip+country
+    has_address = (city_col and state_col and country_col) or (zip_col and country_col)
 
     if not has_latlon and not has_address:
         st.error("Heatmap requires city/state/country or lat/lon columns.")
@@ -187,6 +215,7 @@ def render_heatmap(
                 "City": row.get(city_col, ""),
                 "State": row.get(state_col, ""),
                 "Country": row.get(country_col, ""),
+                "Zip": row.get(zip_col, "") if zip_col else "",
                 "Latitude": None,
                 "Longitude": None,
             })
