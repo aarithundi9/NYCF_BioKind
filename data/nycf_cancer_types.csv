@@ -1,0 +1,91 @@
+year,cancer_type,patient_count
+2022,Anal Cancer,2
+2022,Appendix Cancer,3
+2022,B-Cell Lymphoma,3
+2022,Bladder Cancer,5
+2022,Blood Cancer,1
+2022,Brain Cancer,3
+2022,Breast Cancer,178
+2022,Cervical Cancer,2
+2022,Colorectal Cancer,34
+2022,Endometrial Cancer,7
+2022,Esophageal & Esophagogastric Cancer,6
+2022,Fallopian Tube Cancer,1
+2022,Gastrointestinal Cancer,12
+2022,Head & Neck Cancer,2
+2022,Hodgkin's Lymphoma,7
+2022,Kidney Cancer,3
+2022,Larynx Cancer,1
+2022,Leukemia,15
+2022,Liver Cancer,2
+2022,Lung Cancer,34
+2022,Lymphoma,12
+2022,Multiple Myeloma,29
+2022,Ovarian Cancer,10
+2022,Pancreatic Cancer,7
+2022,Prostate Cancer,26
+2022,Skin Cancer,4
+2022,Stomach Cancer,5
+2022,Testicular Cancer,2
+2022,Throat Cancer,5
+2022,Uterine Cancer,2
+2022,Other,4
+2023,Anal Cancer,6
+2023,Appendix Cancer,3
+2023,Bile Duct Cancer,3
+2023,Bladder Cancer,4
+2023,Blood Cancer,5
+2023,Bone Cancer,2
+2023,Breast Cancer,198
+2023,Cervical Cancer,8
+2023,Colorectal Cancer,39
+2023,Endometrial Cancer,4
+2023,Esophageal & Esophagogastric Cancer,3
+2023,Fallopian Tube Cancer,1
+2023,Gastrointestinal Cancer,7
+2023,Head & Neck Cancer,12
+2023,Kidney Cancer,5
+2023,Leukemia,16
+2023,Liver Cancer,6
+2023,Lung Cancer,54
+2023,Lymphoma,32
+2023,Multiple Myeloma,48
+2023,Ovarian Cancer,10
+2023,Pancreatic Cancer,11
+2023,Prostate Cancer,35
+2023,Skin Cancer,4
+2023,Stomach Cancer,4
+2023,Testicular Cancer,1
+2023,Thyroid Cancer,2
+2023,Throat Cancer,2
+2023,Tongue Cancer,2
+2023,Uterine Cancer,2
+2024,Anal Cancer,1
+2024,Bile Duct Cancer,1
+2024,Brain Cancer,9
+2024,Bladder Cancer,7
+2024,Blood Cancer,5
+2024,Bone Cancer,1
+2024,Breast Cancer,303
+2024,Cervical Cancer,9
+2024,Colorectal Cancer,44
+2024,Endometrial Cancer,16
+2024,Esophageal & Esophagogastric Cancer,4
+2024,Gastrointestinal Cancer,17
+2024,Head & Neck Cancer,14
+2024,Leukemia,31
+2024,Liver Cancer,2
+2024,Lung Cancer,64
+2024,Lymphoma,42
+2024,Multiple Myeloma,53
+2024,Neuroendocrine Carcinoma,3
+2024,Ovarian Cancer,21
+2024,Pancreatic Cancer,18
+2024,Prostate Cancer,47
+2024,Rare Cancer,4
+2024,Renal Cancer,7
+2024,Skin Cancer,12
+2024,Soft Tissue Cancer,3
+2024,Testicular Cancer,3
+2024,Thyroid Cancer,3
+2024,Vulvar Cancer,1

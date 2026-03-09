@@ -1,0 +1,62 @@
+year,hospital_name,patient_referrals
+2022,NY Cancer & Blood Specialists (NYCBS),201
+2022,Memorial Sloan Kettering,69
+2022,Mount Sinai,49
+2022,NYU Langone,38
+2022,NYC Health & Hospitals,14
+2022,Northwell Health,11
+2022,Catholic Health,7
+2022,Stony Brook,4
+2022,Presbyterian,4
+2022,Columbia,3
+2022,Maimonides,2
+2022,Montefiore,2
+2022,Cayuga,1
+2022,Ocean Rad,1
+2022,Pinnacle Breast,1
+2022,Dr. Gardith Joseph,1
+2022,Weill Cornell,1
+2022,WetMed,1
+2023,NY Cancer & Blood Specialists (NYCBS),247
+2023,Mount Sinai,72
+2023,Memorial Sloan Kettering,60
+2023,Montefiore Medical Center,25
+2023,NYU Langone,33
+2023,Northwell Health,23
+2023,New York Presbyterian,14
+2023,NYC Health & Hospitals,11
+2023,Stony Brook,10
+2023,Catholic Health Services,8
+2023,Maimonides Cancer Center,7
+2023,Weill Cornell,5
+2023,Private Oncology Practices,2
+2023,SUNY Downstate,1
+2023,Nassau University,1
+2023,Northport VA,1
+2023,NY Proton Center,1
+2023,Mercy Clinic,1
+2023,St Barnabas Hospital,1
+2023,Quality Cancer Care Oncology,1
+2024,NY Cancer & Blood Specialists (NYCBS),209
+2024,Memorial Sloan Kettering,105
+2024,Mount Sinai,81
+2024,Montefiore Medical Center,50
+2024,NYU Langone,49
+2024,Northwell Health,46
+2024,NY-Presbyterian Columbia University,35
+2024,Stony Brook,27
+2024,NYC Health + Hospitals,20
+2024,Maimonides Cancer Center,14
+2024,Catholic Health Services,5
+2024,NY Proton Cancer Center,3
+2024,Optum Medical Care,3
+2024,Rochester Regional Health GYN Oncology,3
+2024,Bronx Care Health System,2
+2024,Crystal Run Healthcare,2
+2024,Hematology-Oncology Associates,2
+2024,New York Oncology Hematology,2
+2024,RadioSurgery NY,2
+2024,Buffalo Medical Group,1
+2024,RPCI Oncology,1
+2024,Pluta Cancer Center,6
+2024,Other,10
