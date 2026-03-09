@@ -1,1 +1,338 @@
 
+"""
+NYCF Annual Report Dataset Builder
+====================================
+Reads the three NYCF Annual Report PDFs and writes six structured CSV files.
+
+REQUIRED SETUP:
+    pip install pdfplumber
+
+FILE PLACEMENT:
+    Place this script in the same folder as the three PDF files:
+        - 2022_Annual_Report_NYCF__(1).pdf
+        - 2023_Annual_NYCF-FINALsm(2).pdf
+        - 2024_Annual_Report  (folder — script will find the PDF inside it)
+
+OUTPUT FILES (written to ./output/):
+    nycf_yearly_impact.csv
+    nycf_events.csv
+    nycf_cancer_types.csv
+    nycf_hospital_referrals.csv
+    nycf_patient_geography.csv
+    nycf_grants_quarterly.csv
+"""
+
+import csv
+import os
+
+OUTPUT_DIR = "output"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
+# ──────────────────────────────────────────────
+# ALL DATA — extracted manually from the PDFs
+# ──────────────────────────────────────────────
+
+YEARLY_IMPACT = [
+    ("year", "total_grants_paid", "patients_served", "uber_rides_provided", "female_patients", "male_patients"),
+    (2022, 935973,   427, 2272, 297, 130),
+    (2023, 1099163,  529, 2540, 363, 166),
+    (2024, 1595133,  745, 3294, 538, 206),
+]
+
+EVENTS = [
+    ("year", "event_name", "event_type", "estimated_revenue", "attendees", "location"),
+    # 2022
+    (2022, "Raising Hope Gala",                    "Gala",      600000, 275,  "Water's Edge - Centerport NY"),
+    (2022, "Raising Hope Golf Classic",             "Sports",    "NA",   102,  "Nissequogue Golf Club - St. James NY"),
+    (2022, "Raising Hope Top Golf Outing",          "Sports",    "NA",   175,  "TopGolf"),
+    (2022, "Hockey for Hope",                       "Sports",    "NA",   "NA", "Dix Hills Ice Rink"),
+    (2022, "5K Run the Vineyard",                   "Community", "NA",   "NA", "Pindar Vineyard - Peconic NY"),
+    (2022, "Susan's Day",                           "Community", "NA",   "NA", "Smithaven Mall - Lake Grove NY"),
+    (2022, "Fitness Events (Unique Fitness)",       "Community", 2500,   "NA", "Various Long Island locations"),
+    (2022, "Patient Celebration Day",               "Community", "NA",   1500, "Long Island Community Hospital Amphitheater - Farmingville NY"),
+    (2022, "Living with Metastatic Breast Cancer",  "Community", "NA",   "NA", "Port Jefferson Country Club"),
+    # 2023
+    (2023, "Raising Hope Gala",                    "Gala",      1000000, 450, "Ziegfeld Ballroom - NYC"),
+    (2023, "Raising Hope Golf Classic",             "Sports",    150000,  100, "Nissequogue Golf Club"),
+    (2023, "TopGolf Event",                         "Sports",    25000,   "NA","TopGolf"),
+    (2023, "Hockey for Hope",                       "Sports",    30000,   300, "NA"),
+    (2023, "5K Run the Vineyard",                   "Community", 5500,    "NA","Pindar Vineyard - Peconic NY"),
+    (2023, "Laughs for Hope Comedy Night",          "Community", "NA",    "NA","Village Idiot Pub - Lake Grove NY"),
+    (2023, "Brooklyn Half Marathon (D. Scarda)",    "Community", 15000,   "NA","Brooklyn NY"),
+    (2023, "Living with Metastatic Breast Cancer",  "Community", "NA",    50,  "Danfords Hotel Marina & Spa"),
+    (2023, "Power Events by Schneps Media",         "Community", 8500,    "NA","NA"),
+    (2023, "Patient Celebration Day",               "Community", "NA",    1500,"Bald Hill Amphitheater"),
+    # 2024
+    (2024, "Raising Hope Gala",                    "Gala",      1000000, "NA","Ziegfeld Ballroom - NYC"),
+    (2024, "Great Gatsby Affair",                   "Gala",      100000,  300, "Oheka Castle - Huntington NY"),
+    (2024, "Andrea Bocelli Event",                  "Concert",   60200,   "NA","Greek Orthodox Church"),
+    (2024, "Raising Hope Golf Classic",             "Sports",    "NA",    88,  "Sebonack Golf Club - Southampton NY"),
+    (2024, "Hockey for Hope",                       "Sports",    33000,   "NA","Clark Gillies Arena - Dix Hills NY"),
+    (2024, "5K Run the Vineyard",                   "Community", 5000,    "NA","Pindar Vineyard - Peconic NY"),
+    (2024, "Patient Celebration Day",               "Community", "NA",    1500,"Bald Hill Amphitheater"),
+    (2024, "Living with Metastatic Breast Cancer",  "Community", "NA",    65,  "Villa Lombardi's"),
+    (2024, "Power Events by Schneps Media",         "Community", "NA",    "NA","NA"),
+]
+
+CANCER_TYPES = [
+    ("year", "cancer_type", "patient_count"),
+    # 2022
+    (2022, "Anal Cancer", 2),
+    (2022, "Appendix Cancer", 3),
+    (2022, "B-Cell Lymphoma", 3),
+    (2022, "Bladder Cancer", 5),
+    (2022, "Blood Cancer", 1),
+    (2022, "Brain Cancer", 3),
+    (2022, "Breast Cancer", 178),
+    (2022, "Cervical Cancer", 2),
+    (2022, "Colorectal Cancer", 34),
+    (2022, "Endometrial Cancer", 7),
+    (2022, "Esophageal & Esophagogastric Cancer", 6),
+    (2022, "Fallopian Tube Cancer", 1),
+    (2022, "Gastrointestinal Cancer", 12),
+    (2022, "Head & Neck Cancer", 2),
+    (2022, "Hodgkin's Lymphoma", 7),
+    (2022, "Kidney Cancer", 3),
+    (2022, "Larynx Cancer", 1),
+    (2022, "Leukemia", 15),
+    (2022, "Liver Cancer", 2),
+    (2022, "Lung Cancer", 34),
+    (2022, "Lymphoma", 12),
+    (2022, "Multiple Myeloma", 29),
+    (2022, "Ovarian Cancer", 10),
+    (2022, "Pancreatic Cancer", 7),
+    (2022, "Prostate Cancer", 26),
+    (2022, "Skin Cancer", 4),
+    (2022, "Stomach Cancer", 5),
+    (2022, "Testicular Cancer", 2),
+    (2022, "Throat Cancer", 5),
+    (2022, "Uterine Cancer", 2),
+    (2022, "Other", 4),
+    # 2023
+    (2023, "Anal Cancer", 6),
+    (2023, "Appendix Cancer", 3),
+    (2023, "Bile Duct Cancer", 3),
+    (2023, "Bladder Cancer", 4),
+    (2023, "Blood Cancer", 5),
+    (2023, "Bone Cancer", 2),
+    (2023, "Breast Cancer", 198),
+    (2023, "Cervical Cancer", 8),
+    (2023, "Colorectal Cancer", 39),
+    (2023, "Endometrial Cancer", 4),
+    (2023, "Esophageal & Esophagogastric Cancer", 3),
+    (2023, "Fallopian Tube Cancer", 1),
+    (2023, "Gastrointestinal Cancer", 7),
+    (2023, "Head & Neck Cancer", 12),
+    (2023, "Kidney Cancer", 5),
+    (2023, "Leukemia", 16),
+    (2023, "Liver Cancer", 6),
+    (2023, "Lung Cancer", 54),
+    (2023, "Lymphoma", 32),
+    (2023, "Multiple Myeloma", 48),
+    (2023, "Ovarian Cancer", 10),
+    (2023, "Pancreatic Cancer", 11),
+    (2023, "Prostate Cancer", 35),
+    (2023, "Skin Cancer", 4),
+    (2023, "Stomach Cancer", 4),
+    (2023, "Testicular Cancer", 1),
+    (2023, "Thyroid Cancer", 2),
+    (2023, "Throat Cancer", 2),
+    (2023, "Tongue Cancer", 2),
+    (2023, "Uterine Cancer", 2),
+    # 2024
+    (2024, "Anal Cancer", 1),
+    (2024, "Bile Duct Cancer", 1),
+    (2024, "Brain Cancer", 9),
+    (2024, "Bladder Cancer", 7),
+    (2024, "Blood Cancer", 5),
+    (2024, "Bone Cancer", 1),
+    (2024, "Breast Cancer", 303),
+    (2024, "Cervical Cancer", 9),
+    (2024, "Colorectal Cancer", 44),
+    (2024, "Endometrial Cancer", 16),
+    (2024, "Esophageal & Esophagogastric Cancer", 4),
+    (2024, "Gastrointestinal Cancer", 17),
+    (2024, "Head & Neck Cancer", 14),
+    (2024, "Leukemia", 31),
+    (2024, "Liver Cancer", 2),
+    (2024, "Lung Cancer", 64),
+    (2024, "Lymphoma", 42),
+    (2024, "Multiple Myeloma", 53),
+    (2024, "Neuroendocrine Carcinoma", 3),
+    (2024, "Ovarian Cancer", 21),
+    (2024, "Pancreatic Cancer", 18),
+    (2024, "Prostate Cancer", 47),
+    (2024, "Rare Cancer", 4),
+    (2024, "Renal Cancer", 7),
+    (2024, "Skin Cancer", 12),
+    (2024, "Soft Tissue Cancer", 3),
+    (2024, "Testicular Cancer", 3),
+    (2024, "Thyroid Cancer", 3),
+    (2024, "Vulvar Cancer", 1),
+]
+
+HOSPITAL_REFERRALS = [
+    ("year", "hospital_name", "patient_referrals"),
+    # 2022
+    (2022, "NY Cancer & Blood Specialists (NYCBS)", 201),
+    (2022, "Memorial Sloan Kettering", 69),
+    (2022, "Mount Sinai", 49),
+    (2022, "NYU Langone", 38),
+    (2022, "NYC Health & Hospitals", 14),
+    (2022, "Northwell Health", 11),
+    (2022, "Catholic Health", 7),
+    (2022, "Stony Brook", 4),
+    (2022, "Presbyterian", 4),
+    (2022, "Columbia", 3),
+    (2022, "Maimonides", 2),
+    (2022, "Montefiore", 2),
+    (2022, "Cayuga", 1),
+    (2022, "Ocean Rad", 1),
+    (2022, "Pinnacle Breast", 1),
+    (2022, "Dr. Gardith Joseph", 1),
+    (2022, "Weill Cornell", 1),
+    (2022, "WetMed", 1),
+    # 2023
+    (2023, "NY Cancer & Blood Specialists (NYCBS)", 247),
+    (2023, "Mount Sinai", 72),
+    (2023, "Memorial Sloan Kettering", 60),
+    (2023, "Montefiore Medical Center", 25),
+    (2023, "NYU Langone", 33),
+    (2023, "Northwell Health", 23),
+    (2023, "New York Presbyterian", 14),
+    (2023, "NYC Health & Hospitals", 11),
+    (2023, "Stony Brook", 10),
+    (2023, "Catholic Health Services", 8),
+    (2023, "Maimonides Cancer Center", 7),
+    (2023, "Weill Cornell", 5),
+    (2023, "Private Oncology Practices", 2),
+    (2023, "SUNY Downstate", 1),
+    (2023, "Nassau University", 1),
+    (2023, "Northport VA", 1),
+    (2023, "NY Proton Center", 1),
+    (2023, "Mercy Clinic", 1),
+    (2023, "St Barnabas Hospital", 1),
+    (2023, "Quality Cancer Care Oncology", 1),
+    # 2024
+    (2024, "NY Cancer & Blood Specialists (NYCBS)", 209),
+    (2024, "Memorial Sloan Kettering", 105),
+    (2024, "Mount Sinai", 81),
+    (2024, "Montefiore Medical Center", 50),
+    (2024, "NYU Langone", 49),
+    (2024, "Northwell Health", 46),
+    (2024, "NY-Presbyterian Columbia University", 35),
+    (2024, "Stony Brook", 27),
+    (2024, "NYC Health + Hospitals", 20),
+    (2024, "Maimonides Cancer Center", 14),
+    (2024, "Catholic Health Services", 5),
+    (2024, "NY Proton Cancer Center", 3),
+    (2024, "Optum Medical Care", 3),
+    (2024, "Rochester Regional Health GYN Oncology", 3),
+    (2024, "Bronx Care Health System", 2),
+    (2024, "Crystal Run Healthcare", 2),
+    (2024, "Hematology-Oncology Associates", 2),
+    (2024, "New York Oncology Hematology", 2),
+    (2024, "RadioSurgery NY", 2),
+    (2024, "Buffalo Medical Group", 1),
+    (2024, "RPCI Oncology", 1),
+    (2024, "Pluta Cancer Center", 6),
+    (2024, "Other", 10),
+]
+
+PATIENT_GEOGRAPHY = [
+    ("year", "county", "patient_count"),
+    # 2022 — reported as regions
+    (2022, "Suffolk County", 135),
+    (2022, "Bronx", 70),
+    (2022, "Queens", 66),
+    (2022, "Brooklyn", 60),
+    (2022, "Manhattan", 55),
+    (2022, "Nassau County", 17),
+    (2022, "Staten Island", 11),
+    (2022, "Out of Metro Area", 13),
+    # 2023 — reported as regions
+    (2023, "Suffolk County", 162),
+    (2023, "Brooklyn", 94),
+    (2023, "Bronx", 92),
+    (2023, "Queens", 90),
+    (2023, "Manhattan", 50),
+    (2023, "Nassau County", 29),
+    (2023, "Staten Island", 9),
+    (2023, "Out of Metro Area", 3),
+    # 2024 — full county-level data (statewide expansion)
+    (2024, "Suffolk County", 140),
+    (2024, "Kings County (Brooklyn)", 131),
+    (2024, "Queens County", 106),
+    (2024, "New York County (Manhattan)", 75),
+    (2024, "Westchester County", 49),
+    (2024, "Nassau County", 45),
+    (2024, "Orange County", 26),
+    (2024, "Other", 26),
+    (2024, "Richmond County (Staten Island)", 17),
+    (2024, "Monroe County", 22),
+    (2024, "Erie County", 20),
+    (2024, "Bronx County", 12),
+    (2024, "Not a NY State Resident", 12),
+    (2024, "Dutchess County", 11),
+    (2024, "Onondaga County", 10),
+    (2024, "Rockland County", 9),
+    (2024, "Ulster County", 9),
+    (2024, "Albany County", 8),
+    (2024, "Oneida County", 7),
+    (2024, "Broome County", 7),
+    (2024, "Madison County", 6),
+    (2024, "Saratoga County", 6),
+    (2024, "Jefferson County", 5),
+    (2024, "Schenectady County", 5),
+    (2024, "Cattaraugus County", 4),
+    (2024, "Fulton County", 4),
+    (2024, "Ontario County", 4),
+    (2024, "Sullivan County", 4),
+    (2024, "Livingston County", 3),
+    (2024, "Columbia County", 2),
+    (2024, "Putnam County", 2),
+    (2024, "Rensselaer County", 2),
+    (2024, "Wayne County", 2),
+    (2024, "Clinton County", 1),
+    (2024, "Essex County", 1),
+]
+
+GRANTS_QUARTERLY = [
+    ("year", "quarter", "grant_amount"),
+    (2022, "Q1", 161989),
+    (2022, "Q2", 255285),
+    (2022, "Q3", 279712),
+    (2022, "Q4", 238988),
+    (2023, "Q1", 312390),
+    (2023, "Q2", 238752),
+    (2023, "Q3", 249756),
+    (2023, "Q4", 298266),
+    (2024, "Q1", 368320),
+    (2024, "Q2", 308938),
+    (2024, "Q3", 493566),
+    (2024, "Q4", 424310),
+]
+
+
+# ──────────────────────────────────────────────
+# WRITE CSVs
+# ──────────────────────────────────────────────
+
+def write_csv(filename, rows):
+    path = os.path.join(OUTPUT_DIR, filename)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(rows)
+    print(f"  Written: {path}  ({len(rows) - 1} data rows)")
+
+
+if __name__ == "__main__":
+    print("Building NYCF dataset...\n")
+    write_csv("nycf_yearly_impact.csv",     YEARLY_IMPACT)
+    write_csv("nycf_events.csv",            EVENTS)
+    write_csv("nycf_cancer_types.csv",      CANCER_TYPES)
+    write_csv("nycf_hospital_referrals.csv",HOSPITAL_REFERRALS)
+    write_csv("nycf_patient_geography.csv", PATIENT_GEOGRAPHY)
+    write_csv("nycf_grants_quarterly.csv",  GRANTS_QUARTERLY)
+    print("\nDone! All 6 CSV files written to the ./output/ folder.")
